@@ -65,15 +65,16 @@ def diffinator(img):
     # prev = img
     matrix = diff.getNumpy()
     means = matrix_avgs(matrix)
-    print means
+    print max(zip(means, range(5)))
     return diff
 
 def matrix_avgs(m, n=5):
   slice_avgs = []
-  l = len(m[0]) / n
+  w = len(m) / n
+  h = len(m[0])
   for i in range(n):
-    a, b = i*l, i*(l+1)
-    mean = m[:, a:b].mean()
+    a, b = i*w, (i+1)*w
+    mean = m[a:b, 0:(h/2)].mean()
     slice_avgs.append(mean)
   return slice_avgs
 
