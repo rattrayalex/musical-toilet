@@ -2,7 +2,7 @@
 import SimpleCV
 import time, sys, os, argparse
 
-cam = SimpleCV.Camera(0)
+cam = SimpleCV.Camera(1)
 disp = SimpleCV.Display()
 prev = None
 
