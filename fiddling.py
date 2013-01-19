@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import SimpleCV
 import time, sys, os, argparse
+import numpy
 
 cam = SimpleCV.Camera(1)
 disp = SimpleCV.Display()
@@ -63,9 +64,20 @@ def diffinator(img):
     diff = img - prev
     # prev = img
     matrix = diff.getNumpy()
-    mean = matrix.mean()
-    print mean
+    means = matrix_avgs(matrix)
+    print means
     return diff
+
+def matrix_avgs(m, n=5):
+  slice_avgs = []
+  l = len(m[0]) / n
+  for i in range(n):
+    a, b = i*l, i*(l+1)
+    mean = m[:, a:b].mean()
+    slice_avgs.append(mean)
+  return slice_avgs
+
+
 
 def main():
   parser = argparse.ArgumentParser()
