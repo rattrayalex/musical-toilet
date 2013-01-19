@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import SimpleCV
-import time, sys
+import time, sys, os
 
 cam = SimpleCV.Camera(0)
 disp = SimpleCV.Display()
@@ -63,7 +63,6 @@ def diffinator(img):
     return diff
 
 def main():
-  # loadimgs()
   load_play(diffinator)
   disp.quit()
   time.sleep(.1)
