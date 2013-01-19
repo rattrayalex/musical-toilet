@@ -62,11 +62,12 @@ def diffinator(img):
     return img
   else:
     diff = img - prev
+    ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
     # prev = img
-    matrix = diff.getNumpy()
+    matrix = ydiff.getNumpy()
     means = matrix_avgs(matrix)
     print max(zip(means, range(5)))
-    return diff
+    return ydiff
 
 def matrix_avgs(m, n=5):
   slice_avgs = []
