@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import SimpleCV
 import time, sys, os, argparse
 import numpy
@@ -79,7 +78,13 @@ def matrix_avgs(m, n=5):
     slice_avgs.append(mean)
   return slice_avgs
 
-
+def get_dark_slice(img):
+  p = img.getPalette()
+  darkest = sorted(p, key = lambda r: sum(r))
+  blobs = img.findBlobsFromPalette(darkest[:2], minsize=300)
+  blobs.sort(key=lambda b: -b.mArea)
+  dark_slice = blobs[0]
+  return dark_slice.blobImage()
 
 def main():
   parser = argparse.ArgumentParser()
