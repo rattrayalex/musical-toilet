@@ -37,12 +37,12 @@ class PeeCam:
       else:
         img = self.cam.getImage()
 
-      if not orig:
-        print 'not orig'
-        dark_blob, orig, dark_matrix = get_dark_slice(img)
-        print 'got the dark stuff'
+      if func: # diff
+        if not orig:
+          print 'not orig'
+          dark_blob, orig, dark_matrix = get_dark_slice(img)
+          print 'got the dark stuff'
 
-      if func:
         if not show:
           self.diffinator(img, orig, dark_blob, dark_matrix)
         else:
@@ -103,7 +103,7 @@ class PeeCam:
       return
 
     avg = sum(numbers) / float(len(numbers))
-    if avg > 80:
+    if avg < 20:
       if self.status != 'next':
         self.status = 'next'
         # print '======       NEEEEEEEEEEEEEEEEEEEEEEXXXXXXXXXXXXXXXXXTTTTTTTT'
@@ -117,7 +117,7 @@ class PeeCam:
       self.sidetime = 0
       # print '======       ON'
       return
-    elif avg < 20:
+    elif avg > 80:
       self.status = 'share'
       self.sidetime += 1
       twitter = TwitterAPI()
@@ -172,6 +172,7 @@ def get_dark_slice(img):
   print 'sorted blobs'
   dark_blob = blobs[0]
   dark_slice = dark_blob.blobImage()
+  dark_slice.crop(h=min(250, dark_slice.height))
   matrix = dark_slice.getNumpy()
   for col in range(len(matrix)):
     for row in range(len(matrix[col])):
