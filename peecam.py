@@ -10,6 +10,7 @@ class PeeCam:
     self.disp = SimpleCV.Display()
     self.history = []
     self.status = 'first_off'
+    self.sidetime = 0
     self.ss = soundclouding.SoundStreamer()
 
   def run(self, func=None, action=None, dirname=None, show=False):
@@ -70,14 +71,18 @@ class PeeCam:
     return ydiff
 
   def set_status(self):
-    print '                    ',self.status
-    history_len = 8
+    print '                    ', self.status
+    history_len = 10
     recent = self.history[-history_len:]
     numbers = filter(lambda x: x is not None, recent)
-    if len(numbers) < history_len:
+    if not self.status in ['on'] and self.sidetime > 30:
+      self.status = 'off'
+      self.ss.pause()
+    if len(numbers) < history_len / 2:
       if self.status is 'on':
         self.status = 'off'
-        self.ss.stop()
+        self.ss.pause()
+        self.sidetime = 0
         # print '======       TURNING OFF'
         return
       else:
@@ -87,11 +92,13 @@ class PeeCam:
       self.status = 'on'
       # print '======       TURNING OOOONNNNNNNNNNN'
       self.ss.play()
+      self.sidetime = 0
       return
     elif self.status == 'off':
       # print '======       RESSUUUUUUUUUUUUUMMMMEE'
       self.status = 'on'
       self.ss.resume()
+      self.sidetime = 0
       return
 
     avg = sum(numbers) / float(len(numbers))
@@ -101,12 +108,17 @@ class PeeCam:
         # print '======       NEEEEEEEEEEEEEEEEEEEEEEXXXXXXXXXXXXXXXXXTTTTTTTT'
         self.ss.next()
         return
+      else:
+        self.sidetime += 1
+        return
     elif 20 <= avg <= 80:
       self.status = 'on'
+      self.sidetime = 0
       # print '======       ON'
       return
     elif avg < 20:
       self.status = 'share'
+      self.sidetime += 1
       # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
 
