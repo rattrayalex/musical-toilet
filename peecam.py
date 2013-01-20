@@ -36,6 +36,7 @@ class PeeCam:
         print 'got the dark stuff'
 
       if func:
+        # func(img, orig, dark_blob, dark_matrix)
         img = func(img, orig, dark_blob, dark_matrix)
 
       img.save(self.disp)
@@ -55,11 +56,7 @@ def diffinator(img, orig, dark_blob, dark_matrix):
   img = img.crop(dark_blob)
   diff = SimpleCV.Image(img.getNumpy() * dark_matrix) - orig
   ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
-  # matrix = ydiff.getNumpy()
-  # means = matrix_avgs(matrix)
-  # print max(zip(means, range(5)))
   xval = localize(ydiff)
-  # print xval
   return ydiff
 
 def matrix_avgs(m, n=5):
@@ -71,26 +68,6 @@ def matrix_avgs(m, n=5):
     mean = m[a:b, 0:(h/2)].mean()
     slice_avgs.append(mean)
   return slice_avgs
-
-# def localize(m):
-#   # col row rgb
-#   mlen = len(m)
-#   xval, blackest = 0, 255 #cols =
-#   for i in range(mlen):
-#     fro, to = max(i-5,0), min(i+5,(mlen - 1))
-#     col_sum = sum(sum(list(m[fro:to,j,0].flatten())) for j in range(len(m[i])))
-#     # col_sum = 0
-#     # for j in range(len(m[i])):
-#     #   # print j
-#     #   col_sum += sum(list(m[fro:to,j,0].flatten()))
-#     # # print col_sum
-#     if col_sum < blackest:
-#       blackest = col_sum
-#       xval = i
-#   # cols = [(sum(m[max(i-5,0):min(i+5,mlen),:,0]), i) for i in range(mlen)]
-#   # xval = min(cols)[1]
-#   percent = float(xval) / mlen
-#   return percent
 
 def localize(img):
   img = img.invert()
