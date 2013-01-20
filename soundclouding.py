@@ -6,18 +6,20 @@ class SoundStreamer:
   def __init__(self):
     self.client = soundcloud.Client(client_id='045b8c0a4960cce57af82f215695fb3b')
     self.playlist = [
-      ('party-pants', 36247624),
-      ('party-pants-1', 36894638),
-      ('party-pants-2', 37662755),
-      ('party-pants-3', 38415258),
-      ('party-pants-6', 40651214),
-      ('party-pants-8', 42484028),
-      ('party-pants-9', 46637250),
-      ('party-pants-10', 46639797),
-      ('party-pants-12', 61522767),
-      ('party-pants-13', 71527983),
-      ('party-pants-14', 71533432),
+      36247624,  # party-pants
+      36894638,  # party-pants-1
+      37662755,  # party-pants-2
+      38415258,  # party-pants-3
+      40651214,  # party-pants-6
+      42484028,  # party-pants-8
+      46637250,  # party-pants-9
+      46639797,  # party-pants-10
+      61522767,  # party-pants-12
+      71527983,  # party-pants-13
+      71533432,  # party-pants-14
     ]
+    self.current_track = 0
+
     #creates a playbin (plays media form an uri) 
     self.player = gst.element_factory_make("playbin", "player")
 
@@ -55,13 +57,17 @@ class SoundStreamer:
 
     #start playing
     self.player.set_state(gst.STATE_PLAYING)
-    print 'playing'
 
     #listen for tags on the message bus; tag event might be called more than once
     bus = self.player.get_bus()
     bus.enable_sync_message_emission()
     bus.add_signal_watch()
     bus.connect('message::tag', self.on_tag)
+
+    print 'playing'
+
+  def stop(self):
+    self.player.set_state(gst.STATE_NULL)
 
   def resume(self):
     self.player.set_state(gst.STATE_PLAYING)
@@ -71,21 +77,28 @@ class SoundStreamer:
     self.player.set_state(gst.STATE_PAUSED)
     print 'paused'
 
-def play_pause_tester(ss, url):
-  ss.play(url)
-  time.sleep(5)
-  ss.pause()
-  time.sleep(5)
-  ss.resume()
-  time.sleep(5)
-  print 'done'
+  def current_track_url(self):
+    return self.get_track_url(self.playlist[self.current_track])
+
+  def next(self):
+    self.current_track += 1
+    self.stop()
+    self.play(self.current_track_url())
+
+  def play_pause_tester(self):
+    self.play(self.current_track_url())
+    for i in range(len(self.playlist) - 1):
+      time.sleep(5)
+      self.next()
+
+    print 'done'
 
 
 def main():
   ss = SoundStreamer()
-  tracks = ss.get_artist_songs('dj-sampo')
-  url = ss.get_track_url(tracks[0])
-  play_pause_tester(ss, url)
+  # tracks = ss.get_artist_songs('dj-sampo')
+  # url = ss.get_track_url(tracks[0])
+  ss.play_pause_tester()
 
 if __name__ == '__main__':
   main()
