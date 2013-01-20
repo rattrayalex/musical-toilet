@@ -16,9 +16,11 @@ class PeeCam:
     self.ss = soundclouding.SoundStreamer()
     self.starttime = None
     self.sent_tweet = False
+    self.twitter_un = None
 
-  def run(self, func=None, action=None, dirname=None, show=False):
-
+  def run(self, func=None, action=None, dirname=None, show=False,
+          twitter_un=None):
+    self.twitter_un = twitter_un
     if not action == 'load':
       self.warmup_webcam()
 
@@ -131,8 +133,15 @@ class PeeCam:
         twitter = TwitterAPI()
         sec = (datetime.now() - self.starttime).seconds
         soundcloud_link = self.ss.current_track_url()
-        twitter.tweet('Just peed for %d seconds while jamming to %s' % (
-          sec, soundcloud_link))
+        if not sec < 3:
+          if self.twitter_un:
+            twitter.tweet(
+              '@%s: You just peed for %d seconds while jamming to %s' % (
+                self.twitter_un, sec, soundcloud_link))
+          else:
+            twitter.tweet('Just peed for %d seconds while jamming to %s' % (
+                sec, soundcloud_link))
+            
 
       # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
@@ -195,6 +204,7 @@ def main():
   parser.add_argument('--diff', help="diff it lolz", action='store_true')
   parser.add_argument('--show', help="SHOW THAT DIFF lolz", action='store_true')
   parser.add_argument('--load', metavar='dirname', help="load and play imgs from dirname")
+  parser.add_argument('--twitter', help="The Twitter handle to tweet at.")
   pargs = parser.parse_args()
 
   if pargs.diff:
@@ -205,11 +215,12 @@ def main():
   pc = PeeCam()
 
   if pargs.record:
-    pc.run(action='record', dirname=pargs.record)
+    pc.run(action='record', dirname=pargs.record, twitter=pargs.twitter)
   elif pargs.load:
-    pc.run(func=func, action='load', dirname=pargs.load, show=pargs.show)
+    pc.run(func=func, action='load', dirname=pargs.load, show=pargs.show,
+           twitter_un=pargs.twitter)
   else:
-    pc.run(func=func, show=pargs.show)
+    pc.run(func=func, show=pargs.show, twitter_un=pargs.twitter)
 
 if __name__ == '__main__':
   main()
