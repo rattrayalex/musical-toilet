@@ -1,6 +1,7 @@
 import soundcloud
 import pygst, gst
 import time
+from threading import Thread
 
 class SoundStreamer:
   def __init__(self):
@@ -18,7 +19,10 @@ class SoundStreamer:
       71527983,  # party-pants-13
       71533432,  # party-pants-14
     ]
-    self.playlist_urls = [self.get_track_url(t) for t in self.playlist]
+    self.playlist_urls = []
+    playlist_loader = Thread(target=self.load_track_urls)
+    playlist_loader.daemon = True
+    playlist_loader.start()
     self.current_track = 0
 
     #creates a playbin (plays media form an uri) 
@@ -29,6 +33,10 @@ class SoundStreamer:
   # Credit SoundCloud as the source by including one of the logos found here
   # Link to the SoundCloud URL containing the work
   # If the sound is private link to the profile of the creator
+
+  def load_track_urls(self):
+    for t in self.playlist:
+      self.playlist_urls.append(self.get_track_url(t))
 
   def get_track_url(self, track):
     try:
