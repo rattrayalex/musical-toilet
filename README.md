@@ -9,7 +9,7 @@ By Kyle Hardgrave and Alex Rattray at PennApps Spring 2013
 Installation
 ------------
 
-You need SimpleCV, the soundcloud client library, and GStreamer (PyGST). We recommend Ubuntu for this since we spent >6hrs trying to install on both Windows and Mac to no avail. Ubuntu installation took five minutes (ymmv). Note that the soundcloud api currently has an error requiring you to install an old version of the requests library with `pip install -I requests==0.14.2`. 
+You need SimpleCV, the soundcloud client library, tweepy, and GStreamer (PyGST). We recommend Ubuntu for this since we spent >6hrs trying to install on both Windows and Mac to no avail. Ubuntu installation took five minutes (ymmv). Note that the soundcloud api currently has an error requiring you to install an old version of the requests library with `pip install -I requests==0.14.2`. 
 
 
 Usage

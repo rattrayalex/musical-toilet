@@ -179,7 +179,7 @@ def get_dark_slice(img):
   print 'sorted blobs'
   dark_blob = blobs[0]
   dark_slice = dark_blob.blobImage()
-  dark_slice.crop(h=min(250, dark_slice.height))
+  dark_slice.crop(x=0, y=0, w=dark_slice.width, h=min(250, dark_slice.height))
   matrix = dark_slice.getNumpy()
   for col in range(len(matrix)):
     for row in range(len(matrix[col])):
