@@ -1,5 +1,6 @@
 import SimpleCV
 import time, sys, os, argparse
+from datetime import datetime
 from collections import Counter
 import soundclouding
 from twitter import TwitterAPI
@@ -13,6 +14,8 @@ class PeeCam:
     self.status = 'first_off'
     self.sidetime = 0
     self.ss = soundclouding.SoundStreamer()
+    self.starttime = None
+    self.sent_tweet = False
 
   def run(self, func=None, action=None, dirname=None, show=False):
 
@@ -94,12 +97,15 @@ class PeeCam:
       # print '======       TURNING OOOONNNNNNNNNNN'
       self.ss.play()
       self.sidetime = 0
+      self.starttime = datetime.now()
       return
     elif self.status == 'off':
       # print '======       RESSUUUUUUUUUUUUUMMMMEE'
       self.status = 'on'
       self.ss.resume()
+      self.sent_tweet = False
       self.sidetime = 0
+      self.starttime = datetime.now()
       return
 
     avg = sum(numbers) / float(len(numbers))
@@ -120,12 +126,13 @@ class PeeCam:
     elif avg > 80:
       self.status = 'share'
       self.sidetime += 1
-      twitter = TwitterAPI()
-      sec = 10 # TODO: Find time
-      song_name = 'Foobar'
-      soundcloud_link = 'baz'
-      twitter.tweet('Just peed for %d seconds while jamming to %s %s' % (
-          sec, song_name, soundcloud_link)
+      if not self.sent_tweet:
+        self.sent_tweet = True
+        twitter = TwitterAPI()
+        sec = (datetime.now() - self.starttime).seconds
+        soundcloud_link = self.ss.current_track_url()
+        twitter.tweet('Just peed for %d seconds while jamming to %s' % (
+          sec, soundcloud_link))
 
       # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
