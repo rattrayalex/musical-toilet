@@ -1,11 +1,16 @@
 import SimpleCV
 import time, sys, os, argparse
+from collections import Counter
+import soundclouding
 
 class PeeCam:
 
   def __init__(self, cam=0):
     self.cam = SimpleCV.Camera(cam)
     self.disp = SimpleCV.Display()
+    self.history = []
+    self.status = 'first_off'
+    self.ss = soundclouding.SoundStreamer()
 
   def run(self, func=None, action=None, dirname=None, show=False):
 
@@ -37,11 +42,13 @@ class PeeCam:
 
       if func:
         if not show:
-          func(img, orig, dark_blob, dark_matrix)
+          self.diffinator(img, orig, dark_blob, dark_matrix)
         else:
-          img = func(img, orig, dark_blob, dark_matrix)
+          img = self.diffinator(img, orig, dark_blob, dark_matrix)
 
       img.save(self.disp)
+
+      self.set_status()
 
       if action == 'record':
         img.save('%s/%s.jpg' % (dirname, i))
@@ -54,12 +61,45 @@ class PeeCam:
     for i in range(5):
       img = self.cam.getImage()
 
-def diffinator(img, orig, dark_blob, dark_matrix):
-  img = img.crop(dark_blob)
-  diff = SimpleCV.Image(img.getNumpy() * dark_matrix) - orig
-  ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
-  xval = localize(ydiff)
-  return ydiff
+  def diffinator(self, img, orig, dark_blob, dark_matrix):
+    img = img.crop(dark_blob)
+    diff = SimpleCV.Image(img.getNumpy() * dark_matrix) - orig
+    ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
+    xval = localize(ydiff)
+    self.history.append(xval)
+    return ydiff
+
+  def set_status(self):
+    recent = self.history[:20]
+    numbers = filter(lambda x: x is not None, recent)
+    if len(numbers) < 10:
+      if not self.status in ['next', 'share']:
+        self.status = 'off'
+        return
+      else:
+        print ''
+    elif self.status == 'first_off':
+      self.status = 'on'
+      self.ss.play()
+      return
+    elif self.status == 'off':
+      self.status = 'on'
+      self.ss.resume()
+      return
+
+    avg = sum(numbers) / float(len(numbers))
+    if avg > 80:
+      if self.status != 'next':
+        self.status = 'next'
+        self.ss.next()
+        return
+    elif 20 <= avg <= 80:
+      self.status = 'on'
+      return
+    elif avg < 20:
+      self.status = 'share'
+      print 'sharing!'
+      return
 
 def matrix_avgs(m, n=5):
   slice_avgs = []
@@ -88,7 +128,7 @@ def localize(img):
   left_x = blob.topLeftCorner()[0]
   right_x = blob.topRightCorner()[0]
   avg_x = sum([left_x, right_x]) / 2.
-  percent = round((avg_x / img.width) * 100)
+  percent = int(round((avg_x / img.width) * 100))
   print percent, area
   return percent
 
@@ -122,9 +162,9 @@ def main():
   pargs = parser.parse_args()
 
   if pargs.diff:
-    func = diffinator
+    func = True
   else:
-    func = None
+    func = False
 
   pc = PeeCam()
 

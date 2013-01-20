@@ -51,7 +51,8 @@ class SoundStreamer:
     for key in taglist.keys():
       print '\t%s = %s' % (key, taglist[key])
 
-  def play(self, url):
+  def play(self):
+    url = self.current_track_url()
     #set the uri
     self.player.set_property('uri', url)
 
@@ -83,10 +84,10 @@ class SoundStreamer:
   def next(self):
     self.current_track += 1
     self.stop()
-    self.play(self.current_track_url())
+    self.play()
 
   def play_pause_tester(self):
-    self.play(self.current_track_url())
+    self.play()
     for i in range(len(self.playlist) - 1):
       time.sleep(5)
       self.next()
