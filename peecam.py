@@ -2,6 +2,7 @@ import SimpleCV
 import time, sys, os, argparse
 from collections import Counter
 import soundclouding
+from twitter import TwitterAPI
 
 class PeeCam:
 
@@ -119,6 +120,13 @@ class PeeCam:
     elif avg < 20:
       self.status = 'share'
       self.sidetime += 1
+      twitter = TwitterAPI()
+      sec = 10 # TODO: Find time
+      song_name = 'Foobar'
+      soundcloud_link = 'baz'
+      twitter.tweet('Just peed for %d seconds while jamming to %s %s' % (
+          sec, song_name, soundcloud_link)
+
       # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
 
