@@ -7,7 +7,7 @@ class PeeCam:
     self.cam = SimpleCV.Camera(cam)
     self.disp = SimpleCV.Display()
 
-  def run(self, func=None, action=None, dirname=None):
+  def run(self, func=None, action=None, dirname=None, show=False):
 
     if not action == 'load':
       self.warmup_webcam()
@@ -36,8 +36,10 @@ class PeeCam:
         print 'got the dark stuff'
 
       if func:
-        # func(img, orig, dark_blob, dark_matrix)
-        img = func(img, orig, dark_blob, dark_matrix)
+        if not show:
+          func(img, orig, dark_blob, dark_matrix)
+        else:
+          img = func(img, orig, dark_blob, dark_matrix)
 
       img.save(self.disp)
 
@@ -115,22 +117,23 @@ def main():
   parser.add_argument('--record', metavar='dirname', help="record imgs to dirname")
   parser.add_argument('--play', help="play live without recording", action='store_true')
   parser.add_argument('--diff', help="diff it lolz", action='store_true')
+  parser.add_argument('--show', help="SHOW THAT DIFF lolz", action='store_true')
   parser.add_argument('--load', metavar='dirname', help="load and play imgs from dirname")
-  args = parser.parse_args()
+  pargs = parser.parse_args()
 
-  if args.diff:
+  if pargs.diff:
     func = diffinator
   else:
     func = None
 
   pc = PeeCam()
 
-  if args.record:
-    pc.run(action='record', dirname=args.record)
-  elif args.load:
-    pc.run(func=func, action='load', dirname=args.load)
+  if pargs.record:
+    pc.run(action='record', dirname=pargs.record)
+  elif pargs.load:
+    pc.run(func=func, action='load', dirname=pargs.load, show=pargs.show)
   else:
-    pc.run(func=func)
+    pc.run(func=func, show=pargs.show)
 
 if __name__ == '__main__':
   main()
