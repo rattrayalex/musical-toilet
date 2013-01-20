@@ -15,10 +15,14 @@ You need SimpleCV, the soundcloud client library, and GStreamer (PyGST). We reco
 Usage
 -----
 
-`python peecam.py [--load dirname] [--record dirname] [--diff] [--show]`
+`python peecam.py [--play] [--load dirname] [--record dirname] [--diff] [--show]`
 
+`--play` plays live without recording to dir. 
 `--record` records images to a directory (easier to work with than a movie file). 
 `--load` loads directory of images and plays them. 
 `--diff` runs the actual computer-vision type stuff. Run w/o args to play live
 `--show` shows something close to what the computer sees, as it were. 
 
+
+
+MIT License. 
