@@ -5,7 +5,7 @@ import soundclouding
 
 class PeeCam:
 
-  def __init__(self, cam=0):
+  def __init__(self, cam=1):
     self.cam = SimpleCV.Camera(cam)
     self.disp = SimpleCV.Display()
     self.history = []
@@ -45,10 +45,10 @@ class PeeCam:
           self.diffinator(img, orig, dark_blob, dark_matrix)
         else:
           img = self.diffinator(img, orig, dark_blob, dark_matrix)
-
+        
+        self.set_status()
+      
       img.save(self.disp)
-
-      self.set_status()
 
       if action == 'record':
         img.save('%s/%s.jpg' % (dirname, i))
@@ -70,19 +70,26 @@ class PeeCam:
     return ydiff
 
   def set_status(self):
-    recent = self.history[:20]
+    print '                    ',self.status
+    history_len = 8
+    recent = self.history[-history_len:]
     numbers = filter(lambda x: x is not None, recent)
-    if len(numbers) < 10:
-      if not self.status in ['next', 'share']:
+    if len(numbers) < history_len:
+      if self.status is 'on':
         self.status = 'off'
+        self.ss.stop()
+        # print '======       TURNING OFF'
         return
       else:
-        print ''
+        # print '======       NOT TURNING OFF'
+        return
     elif self.status == 'first_off':
       self.status = 'on'
+      # print '======       TURNING OOOONNNNNNNNNNN'
       self.ss.play()
       return
     elif self.status == 'off':
+      # print '======       RESSUUUUUUUUUUUUUMMMMEE'
       self.status = 'on'
       self.ss.resume()
       return
@@ -91,14 +98,16 @@ class PeeCam:
     if avg > 80:
       if self.status != 'next':
         self.status = 'next'
+        # print '======       NEEEEEEEEEEEEEEEEEEEEEEXXXXXXXXXXXXXXXXXTTTTTTTT'
         self.ss.next()
         return
     elif 20 <= avg <= 80:
       self.status = 'on'
+      # print '======       ON'
       return
     elif avg < 20:
       self.status = 'share'
-      print 'sharing!'
+      # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
 
 def matrix_avgs(m, n=5):
@@ -129,7 +138,7 @@ def localize(img):
   right_x = blob.topRightCorner()[0]
   avg_x = sum([left_x, right_x]) / 2.
   percent = int(round((avg_x / img.width) * 100))
-  print percent, area
+  print percent
   return percent
 
 def get_dark_slice(img):
