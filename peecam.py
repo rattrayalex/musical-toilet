@@ -81,6 +81,8 @@ class PeeCam:
     history_len = 10
     recent = self.history[-history_len:]
     numbers = filter(lambda x: x is not None, recent)
+    if self.status in ['share', 'next']: 
+      self.sidetime += 1
     if not self.status in ['on'] and self.sidetime > 30:
       self.status = 'off'
       self.ss.pause()
@@ -118,7 +120,6 @@ class PeeCam:
         self.ss.next()
         return
       else:
-        self.sidetime += 1
         return
     elif 20 <= avg <= 80:
       self.status = 'on'
@@ -127,7 +128,6 @@ class PeeCam:
       return
     elif avg > 80:
       self.status = 'share'
-      self.sidetime += 1
       if not self.sent_tweet:
         self.sent_tweet = True
         twitter = TwitterAPI()
