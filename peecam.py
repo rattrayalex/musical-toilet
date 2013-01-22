@@ -4,6 +4,7 @@ from datetime import datetime
 from collections import Counter
 import soundclouding
 from twitter import TwitterAPI
+from threading import Thread
 
 class PeeCam:
 
@@ -72,6 +73,8 @@ class PeeCam:
     img = img.crop(dark_blob)
     diff = SimpleCV.Image(img.getNumpy() * dark_matrix) - orig
     ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
+    ydiff = ydiff.invert()
+    ydiff *= 20
     xval = localize(ydiff)
     self.history.append(xval)
     return ydiff
@@ -129,22 +132,30 @@ class PeeCam:
     elif avg > 80:
       self.status = 'share'
       if not self.sent_tweet:
+        tweet_worker = Thread(target=self.tweet)
+        tweet_worker.daemon = True
+        tweet_worker.start()
         self.sent_tweet = True
-        twitter = TwitterAPI()
-        sec = (datetime.now() - self.starttime).seconds
-        soundcloud_link = self.ss.current_track_url()
-        if not sec < 3:
-          if self.twitter_un:
-            twitter.tweet(
-              '@%s: You just peed for %d seconds while jamming to %s' % (
-                self.twitter_un, sec, soundcloud_link))
-          else:
-            twitter.tweet('Just peed for %d seconds while jamming to %s' % (
-                sec, soundcloud_link))
-            
 
       # print '======       SHAAARRRRRRRRRRRRRRRRIIIIIIIIIIIIIIIINNGG!!!!'
       return
+
+  def tweet(self):
+    try:
+      twitter = TwitterAPI()
+      sec = (datetime.now() - self.starttime).seconds
+      soundcloud_link = self.ss.current_track_permalink()
+      if not sec < 3:
+
+        if self.twitter_un:
+          twitter.tweet(
+            '@%s just peed for %d seconds while jamming to %s' % (
+              self.twitter_un, sec, soundcloud_link))
+        else:
+          twitter.tweet('Just peed for %d seconds while jamming to %s' % (
+              sec, soundcloud_link))
+    except Exception, e:
+      print 'could not tweet: ', e
 
 def matrix_avgs(m, n=5):
   slice_avgs = []
@@ -157,19 +168,27 @@ def matrix_avgs(m, n=5):
   return slice_avgs
 
 def localize(img):
-  img = img.invert()
-  blobs = img.findBlobs()
+  # img = img.invert()
+  blobs = img.findBlobs(threshval=254, minsize=20)
+
   try:
-    blobs.sort(key=lambda b: b.mArea)
-  except:
-    print 'could not sort'
+    blobs.draw()
+    # blobs = filter(lambda b: b.mArea > 500, blobs)
+    blobs.sort(key=lambda b: -b.mArea)
+    blob = blobs[0]
+  except Exception, e:
+    print 'could not sort', e
     return None
-  blob = blobs[0]
+  
+  # aspect_ratio = blob.width() / float(blob.length())
+  # print aspect_ratio
+
   area = blob.mArea
-  if area < 15:
+  print '                                          ', area
+  if area < 20:
     print 'too small', area
     return None
-  # blob.draw()
+  blob.draw()
   left_x = blob.topLeftCorner()[0]
   right_x = blob.topRightCorner()[0]
   avg_x = sum([left_x, right_x]) / 2.
@@ -182,7 +201,7 @@ def get_dark_slice(img):
   print 'got palette'
   darkest = sorted(p, key = lambda r: sum(r))
   print 'sorted out darkest'
-  blobs = img.findBlobsFromPalette(darkest[:2], minsize=300)
+  blobs = img.findBlobsFromPalette(darkest[:3], minsize=300)
   print 'found blobs'
   blobs.sort(key=lambda b: -b.mArea)
   print 'sorted blobs'
@@ -197,6 +216,7 @@ def get_dark_slice(img):
           matrix[col][row][c] = 1
   print 'done with the beast'
   return dark_blob, dark_slice, matrix
+
 
 def main():
   parser = argparse.ArgumentParser()
@@ -216,7 +236,7 @@ def main():
   pc = PeeCam()
 
   if pargs.record:
-    pc.run(action='record', dirname=pargs.record, twitter=pargs.twitter)
+    pc.run(action='record', dirname=pargs.record)
   elif pargs.load:
     pc.run(func=func, action='load', dirname=pargs.load, show=pargs.show,
            twitter_un=pargs.twitter)

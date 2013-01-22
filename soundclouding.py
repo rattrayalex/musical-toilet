@@ -8,7 +8,7 @@ class SoundStreamer:
     self.client = soundcloud.Client(client_id='045b8c0a4960cce57af82f215695fb3b')
     self.playlist = [
       36247624,  # party-pants
-      36894638,  # party-pants-1
+      # 36894638,  # party-pants-1
       37662755,  # party-pants-2
       38415258,  # party-pants-3
       40651214,  # party-pants-6
@@ -20,6 +20,7 @@ class SoundStreamer:
       71533432,  # party-pants-14
     ]
     self.playlist_urls = []
+    self.playlist_permalinks = []
     playlist_loader = Thread(target=self.load_track_urls)
     playlist_loader.daemon = True
     playlist_loader.start()
@@ -36,7 +37,9 @@ class SoundStreamer:
 
   def load_track_urls(self):
     for t in self.playlist:
-      self.playlist_urls.append(self.get_track_url(t))
+      stream_url, permalink_url = self.get_track_url(t)
+      self.playlist_permalinks.append(permalink_url)
+      self.playlist_urls.append(stream_url)
 
   def get_track_url(self, track):
     try:
@@ -45,7 +48,7 @@ class SoundStreamer:
       pass
     stream_url = self.client.get(track.stream_url, allow_redirects=False)
     print stream_url.location
-    return stream_url.location
+    return stream_url.location, track.permalink_url
 
   # no idea what this does
   def on_tag(self, bus, msg):
@@ -83,6 +86,9 @@ class SoundStreamer:
 
   def current_track_url(self):
     return self.playlist_urls[self.current_track]
+
+  def current_track_permalink(self):
+    return self.playlist_permalinks[self.current_track]
 
   def next(self):
     self.current_track += 1
