@@ -9,7 +9,7 @@ class SoundStreamer:
     self.playlist = [
       36247624,  # party-pants
       # 36894638,  # party-pants-1
-      37662755,  # party-pants-2
+      # 37662755,  # party-pants-2
       38415258,  # party-pants-3
       40651214,  # party-pants-6
       42484028,  # party-pants-8

@@ -2,8 +2,7 @@ Musical Toilet
 ==============
 
 
-By Kyle Hardgrave and Alex Rattray at PennApps Spring 2013
-----------------------------------------------------------
+Video of toilet in action: http://www.youtube.com/watch?v=EG2NHagHWM0
 
 
 Installation
@@ -28,5 +27,15 @@ Usage
 `--show` shows something close to what the computer sees, as it were. 
 
 
+Setting up the Camera
+---------------------
+
+The webcam should be perched near the base of the back of the toilet; we put it on the top of the toilet seat when it is up. It's important that the view is centered and that nothing but toilet is visible (ie; avoid having areas of the background showing in the camera). The script relies on there being a relatively thin, dark shadow underneath the rim of the toilet, which is common in most lighting conditions. 
+
+
+Authors
+-------
+
+Kyle Hardgrave (http://kylehardgrave.com/) and Alex Rattray (http://alexrattray.com/). Built at PennApps Spring 2013 (and tuned up a little bit thereafter). 
 
 MIT License. 

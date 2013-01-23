@@ -74,7 +74,7 @@ class PeeCam:
     diff = SimpleCV.Image(img.getNumpy() * dark_matrix) - orig
     ydiff = diff.colorDistance(SimpleCV.Color.YELLOW)
     ydiff = ydiff.invert()
-    ydiff *= 20
+    ydiff *= 25
     xval = localize(ydiff)
     self.history.append(xval)
     return ydiff
@@ -165,11 +165,11 @@ def matrix_avgs(m, n=5):
     a, b = i*w, (i+1)*w
     mean = m[a:b, 0:(h/2)].mean()
     slice_avgs.append(mean)
-  return slice_avgs
+  return slice_avgsid
 
 def localize(img):
   # img = img.invert()
-  blobs = img.findBlobs(threshval=254, minsize=20)
+  blobs = img.findBlobs(threshval=254, minsize=15)
 
   try:
     blobs.draw()
@@ -177,7 +177,7 @@ def localize(img):
     blobs.sort(key=lambda b: -b.mArea)
     blob = blobs[0]
   except Exception, e:
-    print 'could not sort', e
+    print 'could not sort'
     return None
   
   # aspect_ratio = blob.width() / float(blob.length())
@@ -207,7 +207,7 @@ def get_dark_slice(img):
   print 'sorted blobs'
   dark_blob = blobs[0]
   dark_slice = dark_blob.blobImage()
-  dark_slice.crop(x=0, y=0, w=dark_slice.width, h=min(250, dark_slice.height))
+  # dark_slice =dark_slice.crop(x=0, y=0, w=dark_slice.width, h=min(250, dark_slice.height))
   matrix = dark_slice.getNumpy()
   for col in range(len(matrix)):
     for row in range(len(matrix[col])):
